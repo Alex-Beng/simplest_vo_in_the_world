@@ -1,0 +1,1 @@
+g++ main.cpp image_process.h `pkg-config --cflags --libs opencv` -o demo

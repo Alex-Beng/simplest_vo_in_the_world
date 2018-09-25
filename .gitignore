@@ -1,0 +1,6 @@
+*.jpg
+*.png
+*.xmind
+*.o
+.vscode
+backup
