@@ -2,4 +2,8 @@
 *.png
 *.xmind
 *.o
+*.exe
+*.txt
+*.ini
 .vscode
+demo

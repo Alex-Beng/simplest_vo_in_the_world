@@ -1,5 +1,9 @@
+#include "../../src/ini/minIni.h"
 #include <algorithm>
-#include <iostream>  
+#include <iostream> 
+#include <iomanip> 
+#include <sstream>
+#include <fstream>
 #include <opencv2/opencv.hpp>    
  
 using namespace std;      
@@ -20,6 +24,7 @@ int main(int argc,char*argv[])
 {  
     cv::Mat imageSource;
     cv::Mat image;
+    cv::Mat demarcate_element; // the ans mat;
     cv::VideoCapture cp(0);
     while (1) {
         cv::namedWindow("src");
@@ -112,8 +117,21 @@ int main(int argc,char*argv[])
 
         cv::Mat transf_element = cv::getPerspectiveTransform(ori_points,train_points);
         cv::warpPerspective(imageSource,imageSource,transf_element,imageSource.size());
+        for (int i=0;i<4;i++) {
+            cv::line(imageSource,train_points[i],train_points[(i+1)%4],cv::Scalar(0,0,50*i),2);
+        }
         cv::imshow("fixed",imageSource);
+
         // debug print
+        cout<<transf_element<<endl<<endl;
+        // for (int i=0; i< transf_element.cols; i++) {
+        //     for (int j=0; j<transf_element.rows; j++) {
+        //         cout<<transf_element.at<double>(i,j)<<endl;
+        //     }
+        // }
+        // cv::convertScaleAbs(transf_element,transf_element);
+        // cv::resize(transf_element,transf_element,cv::Size(200,200));
+        // cv::imshow("viewable",transf_element);
         // for (int i=0;i<4;i++) {
         //     cv::line(imageSource,train_points[i],train_points[(i+1)%4],cv::Scalar(0,0,50*i),2);
         // }
@@ -123,21 +141,30 @@ int main(int argc,char*argv[])
         // cv::circle(image,train_points[1],3,255,2);
         // cv::imshow("points",image);
         // cout<<atan(ori_tan)<<' '<<atan(ori_tan)/CV_PI*180<<endl;
+        char t_char = cv::waitKey(50);
+        if (t_char == 's') {
+            // write the element with std c++ fstream !!!!!!!!!!!!
+            ofstream out_file("../../src/ini/777.txt");
 
-
-        // int width=ori_points[1].x-ori_points[0].x;
-        // int hight=ori_points[2].y-ori_points[0].y;
-        // train_points[0]=ori_points[0];
-        // train_points[1]=Point2f(train_points[0].x+width,train_points[0].y);
-        // train_points[2]=Point2f(train_points[0].x,train_points[1].y+hight);
-        // train_points[3]=Point2f(train_points[1].x,train_points[2].y);
-        // Mat elementTransf;
-        // elementTransf=	getAffineTransform(ori_points,train_points);
-        // cout<<elementTransf<<endl;
-        // warpAffine(imageSource,imageSource,elementTransf,imageSource.size(),1,0,Scalar(255));
-        // imshow("fixed",imageSource);	
-        
-        waitKey(1);   
+            // ini cut off the double!!!!!
+            // minIni* ini = new minIni("../../src/ini/data.ini");
+            // stringstream t_ss;
+            // int t_count = 0;
+            for (int i=0; i< transf_element.cols; i++) {
+                for (int j=0; j<transf_element.rows; j++) {
+                    out_file<<fixed<<setprecision(16)<<transf_element.at<double>(i,j)<<endl;
+                    // cout<<fixed<<setprecision(15)<<transf_element.at<double>(i,j)<<endl;
+                    // t_ss<<t_count++;
+                    // ini->put("transf_element","element"+t_ss.str(),transf_element.at<double>(i,j));
+                    // t_ss.str("");
+                    // t_ss.clear();
+                }
+            }
+            break;
+        }
+        else if (t_char == 'q'){
+            break;
+        }
     } 
 	return 0;  
 }
