@@ -90,10 +90,39 @@ int main(int argc,char*argv[])
         // cv::line(imageSource,ori_points[0],ori_points[1],cv::Scalar(0,0,255));
         // cv::line(imageSource,ori_points[1],ori_points[2],cv::Scalar(0,255,0));
         // cv::line(imageSource,ori_points[2],ori_points[3],cv::Scalar(255,0,0));
-
+        
         // cv::imshow("src",imageSource);
 
         double rect_lenght = get_distance(ori_points[2],ori_points[3]);
+
+        double ori_tan = (ori_points[2].y - ori_points[3].y)
+                            /(ori_points[2].x-ori_points[3].x);   // atan()返回弧度制鸭
+        double tan_3_1 = -1/ori_tan;
+        double cos_3_1 = cos(atan(ori_tan));
+        double sin_3_1 = sin(atan(ori_tan));
+
+        train_points[2] = ori_points[2];
+        train_points[3] = ori_points[3];
+
+        train_points[1].x = ori_points[3].x + rect_lenght*sin_3_1;
+        train_points[1].y = ori_points[3].y - rect_lenght*cos_3_1;
+
+        train_points[0].x = ori_points[2].x + rect_lenght*sin_3_1;
+        train_points[0].y = ori_points[2].y - rect_lenght*cos_3_1;
+
+        cv::Mat transf_element = cv::getPerspectiveTransform(ori_points,train_points);
+        cv::warpPerspective(imageSource,imageSource,transf_element,imageSource.size());
+        cv::imshow("fixed",imageSource);
+        // debug print
+        // for (int i=0;i<4;i++) {
+        //     cv::line(imageSource,train_points[i],train_points[(i+1)%4],cv::Scalar(0,0,50*i),2);
+        // }
+        // cv::imshow("train",imageSource);
+        // cout<<'t'<<ori_tan<<endl;
+        // cout<<train_points[1]<<endl;
+        // cv::circle(image,train_points[1],3,255,2);
+        // cv::imshow("points",image);
+        // cout<<atan(ori_tan)<<' '<<atan(ori_tan)/CV_PI*180<<endl;
 
 
         // int width=ori_points[1].x-ori_points[0].x;
@@ -122,5 +151,5 @@ bool sort_method(cv::Point2f p1, cv::Point2f p2) {
     return p1.y<p2.y;
 }
 double get_distance(cv::Point2f p1, cv::Point2f p2) {
-
+    return sqrt( (p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y) );
 }
