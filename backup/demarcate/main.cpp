@@ -1,7 +1,7 @@
 #include "../../src/ini/minIni.h"
 #include <algorithm>
 #include <iostream> 
-#include <iomanip> 
+#include <iomanip>
 #include <sstream>
 #include <fstream>
 #include <opencv2/opencv.hpp>    
@@ -25,7 +25,7 @@ int main(int argc,char*argv[])
     cv::Mat imageSource;
     cv::Mat image;
     cv::Mat demarcate_element; // the ans mat;
-    cv::VideoCapture cp(0);
+    cv::VideoCapture cp(1);
     while (1) {
         cv::namedWindow("src");
         cv::createTrackbar("binary_thre","binary",&binary_thre,max_thre,on_trackerbar);
