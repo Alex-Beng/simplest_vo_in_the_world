@@ -186,7 +186,8 @@ int main(int argc,char*argv[])
             cv::destroyAllWindows();
             break;
         }
-    } 
+    }
+
     cout<<"demarcate the forward direction..."<<endl;
     cv::namedWindow("fixed_src");
     cv::setMouseCallback("fixed_src", on_mouse, 0);
@@ -197,8 +198,8 @@ int main(int argc,char*argv[])
             continue;
         }  
         cv::warpPerspective(image,image,transf_element,image.size()); 
-        
-        cv::imshow("fixed_src",image);
+        image.copyTo(imageSource);// 供回调函数画画使用
+        // cv::imshow("fixed_src",image);
         char t_char = cv::waitKey(1);
         if (t_char == 'q') {
             cv::destroyAllWindows();
@@ -226,20 +227,33 @@ double get_distance(cv::Point2f p1, cv::Point2f p2) {
 }
 
 static void on_mouse(int event, int x, int y, int flags, void *) {
-    if (x<0 || x>=image.cols || y<0 || y>= image.rows) {
+    if (x<0 || x>=image.cols || y<0 || y>= image.rows) { //如果在窗口外..什么都不干
         return ;
     }
-    if (event == CV_EVENT_LBUTTONDOWN) {
+    if (event == CV_EVENT_LBUTTONDOWN) { //左键点两次定位
         switch (forward_count) {
         case 0:
             forward_points[forward_count] = cv::Point2i(x,y);
             forward_count++;
+            cv::circle(image,cv::Point2i(x,y),2,cv::Scalar(0,0,255),2);
             break;
         case 1:
             forward_points[forward_count] = cv::Point2i(x,y);
             forward_count++;
             break;
+        case 2:
+            cout<<forward_points[0]<<endl<<forward_points[1]<<endl<<endl;
+            cv::line(image,forward_points[0],forward_points[1],cv::Scalar(255,0,0),2);
+            // write data
+            ofstream out_file("../../src/ini/666.txt");
+            out_file<<forward_points[0].x<<endl<<forward_points[0].y<<endl<<forward_points[1].x<<endl<<forward_points[1].y;
+            out_file.close();
+            break;
         }
+        cv::imshow("fixed_src",image);
     }
-    // if (event == )
+    else if (event == CV_EVENT_RBUTTONDOWN) { // 点一次右键复位
+        cv::imshow("fixed_src",imageSource);
+        forward_count = 0;
+    }
 }
