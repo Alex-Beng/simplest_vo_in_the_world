@@ -15,19 +15,24 @@ int hough_thre = 93;
 int hough_stn_thre = 0;
 int hough_srn_thre = 0;
 int corner_distance_thre = 90;
+// for forward direction
+cv::Point forward_points[2];
+int forward_count = 0;
 
+static void on_mouse(int,int,int,int,void*);
 void on_trackerbar(int,void*);
 bool sort_method(cv::Point2f,cv::Point2f);
 double get_distance(cv::Point2f,cv::Point2f);
 
+cv::Mat imageSource;
+cv::Mat image;
+cv::Mat transf_element; // the ans mat;
+
+int camera_count = 1;
+cv::VideoCapture cp(camera_count);
+
 int main(int argc,char*argv[])    
 {  
-    cv::Mat imageSource;
-    cv::Mat image;
-    cv::Mat demarcate_element; // the ans mat;
-
-    int camera_count = 1;
-    cv::VideoCapture cp(camera_count);
     while (1) {
         cv::namedWindow("src");
         cv::createTrackbar("binary_thre","binary",&binary_thre,max_thre,on_trackerbar);
@@ -39,6 +44,7 @@ int main(int argc,char*argv[])
         if (image.empty()) {    // 解决打不带usb摄像头的问题...
             // cp = cv::VideoCapture(++camera_count);
             // cout<<camera_count<<endl;
+            cout<<"waiting for camera init..."<<endl;
             continue;
         }
         image.copyTo(imageSource);
@@ -126,7 +132,7 @@ int main(int argc,char*argv[])
         train_points[0].x = ori_points[2].x + rect_lenght*sin_3_1;
         train_points[0].y = ori_points[2].y - rect_lenght*cos_3_1;
 
-        cv::Mat transf_element = cv::getPerspectiveTransform(ori_points,train_points);
+        transf_element = cv::getPerspectiveTransform(ori_points,train_points);
         cv::warpPerspective(imageSource,imageSource,transf_element,imageSource.size());
         for (int i=0;i<4;i++) {
             cv::line(imageSource,train_points[i],train_points[(i+1)%4],cv::Scalar(0,0,50*i),2);
@@ -173,12 +179,37 @@ int main(int argc,char*argv[])
             }
             out_file<<cms_per_pix;
             out_file.close();
+            cv::destroyAllWindows();
             break;
         }
         else if (t_char == 'q'){
+            cv::destroyAllWindows();
             break;
         }
     } 
+    cout<<"demarcate the forward direction..."<<endl;
+    cv::namedWindow("fixed_src");
+    cv::setMouseCallback("fixed_src", on_mouse, 0);
+    while (1) {
+        cp>>image;
+        if (image.empty()) {
+            cout<<"waitint for camera init..."<<endl;
+            continue;
+        }  
+        cv::warpPerspective(image,image,transf_element,image.size()); 
+        
+        cv::imshow("fixed_src",image);
+        char t_char = cv::waitKey(1);
+        if (t_char == 'q') {
+            cv::destroyAllWindows();
+            break;
+        }
+        else if (t_char == 's') {
+            cv::destroyAllWindows();
+            // do sth to save the data.
+            break;
+        }
+    }
 	return 0;  
 }
 
@@ -192,4 +223,23 @@ bool sort_method(cv::Point2f p1, cv::Point2f p2) {
 }
 double get_distance(cv::Point2f p1, cv::Point2f p2) {
     return sqrt( (p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y) );
+}
+
+static void on_mouse(int event, int x, int y, int flags, void *) {
+    if (x<0 || x>=image.cols || y<0 || y>= image.rows) {
+        return ;
+    }
+    if (event == CV_EVENT_LBUTTONDOWN) {
+        switch (forward_count) {
+        case 0:
+            forward_points[forward_count] = cv::Point2i(x,y);
+            forward_count++;
+            break;
+        case 1:
+            forward_points[forward_count] = cv::Point2i(x,y);
+            forward_count++;
+            break;
+        }
+    }
+    // if (event == )
 }

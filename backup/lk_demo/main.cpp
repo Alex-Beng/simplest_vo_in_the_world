@@ -16,7 +16,6 @@ Mat gray;
 Mat gray_prev;
 Mat map_ = cv::Mat(600,600,CV_8UC1,cv::Scalar(255));
 Mat transf_element = cv::Mat(3,3,CV_64FC1);
-// Rect current_position(290,290,20,20);
 Point2f current_position(290.0,290.0);
 vector<Point2f> points[2];    
 vector<Point2f> initial;
