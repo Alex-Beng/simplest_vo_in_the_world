@@ -25,7 +25,9 @@ int main(int argc,char*argv[])
     cv::Mat imageSource;
     cv::Mat image;
     cv::Mat demarcate_element; // the ans mat;
-    cv::VideoCapture cp(1);
+
+    int camera_count = 1;
+    cv::VideoCapture cp(camera_count);
     while (1) {
         cv::namedWindow("src");
         cv::createTrackbar("binary_thre","binary",&binary_thre,max_thre,on_trackerbar);
@@ -34,6 +36,11 @@ int main(int argc,char*argv[])
         cv::createTrackbar("hough_srn_thre","line",&hough_srn_thre,100,on_trackerbar);
         cv::createTrackbar("corner_distance_thre","points",&corner_distance_thre,max_thre,on_trackerbar);
         cp>>image;
+        if (image.empty()) {    // 解决打不带usb摄像头的问题...
+            // cp = cv::VideoCapture(++camera_count);
+            // cout<<camera_count<<endl;
+            continue;
+        }
         image.copyTo(imageSource);
         // cv::cvtColor(image,image,CV_BGR2GRAY);
         cv::Mat t_channels[3];
@@ -98,7 +105,11 @@ int main(int argc,char*argv[])
         
         // cv::imshow("src",imageSource);
 
-        double rect_lenght = get_distance(ori_points[2],ori_points[3]);
+        double rect_lenght = get_distance(ori_points[2],ori_points[3]); 
+
+        double real_lenght = 8.2; // 边长为8.2厘米
+        double cms_per_pix = real_lenght/rect_lenght;
+        cout<<cms_per_pix<<endl;
 
         double ori_tan = (ori_points[2].y - ori_points[3].y)
                             /(ori_points[2].x-ori_points[3].x);   // atan()返回弧度制鸭
@@ -160,6 +171,8 @@ int main(int argc,char*argv[])
                     // t_ss.clear();
                 }
             }
+            out_file<<cms_per_pix;
+            out_file.close();
             break;
         }
         else if (t_char == 'q'){
