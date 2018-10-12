@@ -16,7 +16,7 @@ int hough_stn_thre = 0;
 int hough_srn_thre = 0;
 int corner_distance_thre = 90;
 // for forward direction
-cv::Point forward_points[2];
+cv::Point2f forward_points[2];
 int forward_count = 0;
 
 static void on_mouse(int,int,int,int,void*);
@@ -233,20 +233,21 @@ static void on_mouse(int event, int x, int y, int flags, void *) {
     if (event == CV_EVENT_LBUTTONDOWN) { //左键点两次定位
         switch (forward_count) {
         case 0:
-            forward_points[forward_count] = cv::Point2i(x,y);
+        case 1:
+            // forward_points[forward_count] = cv::Point2i(x,y);
+            forward_points[forward_count].x = 1.0*x;
+            forward_points[forward_count].y = 1.0*y;
             forward_count++;
             cv::circle(image,cv::Point2i(x,y),2,cv::Scalar(0,0,255),2);
-            break;
-        case 1:
-            forward_points[forward_count] = cv::Point2i(x,y);
-            forward_count++;
             break;
         case 2:
             cout<<forward_points[0]<<endl<<forward_points[1]<<endl<<endl;
             cv::line(image,forward_points[0],forward_points[1],cv::Scalar(255,0,0),2);
             // write data
             ofstream out_file("../../src/ini/666.txt");
-            out_file<<forward_points[0].x<<endl<<forward_points[0].y<<endl<<forward_points[1].x<<endl<<forward_points[1].y;
+            out_file<<(forward_points[1].x-forward_points[0].x)/get_distance(forward_points[0],forward_points[1])
+                <<endl<<(forward_points[1].y-forward_points[0].y)/get_distance(forward_points[0],forward_points[1]);
+
             out_file.close();
             break;
         }

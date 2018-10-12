@@ -17,6 +17,7 @@ Mat gray_prev;
 Mat map_ = cv::Mat(600,600,CV_8UC1,cv::Scalar(255));
 Mat transf_element = cv::Mat(3,3,CV_64FC1);
 Point2f current_position(290.0,290.0);
+Point2f forward_direction;
 vector<Point2f> points[2];    
 vector<Point2f> initial;
 vector<Point2f> features;
@@ -41,7 +42,16 @@ int main() {
             transf_element.at<double>(i,j) = t;
         }
     }
+    in_file.close();
     cout<<transf_element<<endl;
+    // load the forward direction.
+    in_file.open("../../src/ini/666.txt");
+    if (!in_file) {
+        cerr<<"error in Load direction"<<endl;
+    }
+    in_file>>forward_direction.x>>forward_direction.y;
+    cout<<forward_direction<<endl;
+
     Mat frame;
     Mat result;
 
@@ -53,7 +63,7 @@ int main() {
         capture >> frame;
 
         if (frame.empty()) { 
-            printf("wait for camera initing...");
+            printf("wait for camera initing...\n");
             continue;
         }
         // apply the perspective transform
@@ -113,18 +123,15 @@ void tracking(Mat &frame, Mat &output) {
         line(output, initial[i], points[1][i], Scalar(0, 0, 255));
         circle(output, points[1][i], 3, Scalar(0, 255, 0), -1);
     }
-    // cout<<(points[1][1].y - initial[1].y)<<' '<< (points[1][1].x - initial[1].x)<<endl;
+    
     sum_delta_col /= points[1].size();
     sum_delta_row /= points[1].size();
-    if (fabs(sum_delta_col)>1 && fabs(sum_delta_row)>1) {
-        // cout<<current_position.x<<' '<<current_position.y<<endl;
-        // cout<<sum_delta_col*0.0001<<' '<<sum_delta_row*0.0001<<endl;
-        current_position.x = current_position.x + sum_delta_col*0.01;
-        current_position.y = current_position.y + sum_delta_row*0.01;
+    if (fabs(sum_delta_col)>10 || fabs(sum_delta_row)>10) {
+        current_position.x = current_position.x + sum_delta_col*0.1;
+        current_position.y = current_position.y + sum_delta_row*0.1;
         cout<<current_position<<endl<<endl;
-        // cout<<current_position.x<<' '<<current_position.y<<endl<<endl;
-        // cout<<sum_delta_col<<' '<<sum_delta_row<<endl<<endl;
-        // cout<<current_position.x<<' '<<current_position.y<<endl;
+        current_position.y = 
+        // 
     }
     map_.copyTo(t_mat);
     // cv::rectangle(t_mat,current_position,Scalar(0),2);
