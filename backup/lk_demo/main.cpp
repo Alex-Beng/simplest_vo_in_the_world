@@ -44,6 +44,7 @@ int main() {
     }
     in_file.close();
     cout<<transf_element<<endl;
+
     // load the forward direction.
     in_file.open("../../src/ini/666.txt");
     if (!in_file) {
@@ -55,7 +56,7 @@ int main() {
     Mat frame;
     Mat result;
 
-    VideoCapture capture(1);
+    VideoCapture capture(0);
     if (!capture.isOpened()) {
         cv::waitKey(1000);
     }
@@ -90,13 +91,13 @@ void tracking(Mat &frame, Mat &output) {
 
     frame.copyTo(output);
 
-    if (points[0].size() <= 10) { // ÉÏÒ»Ö¡µÄµã²»¹»ÓÃÁË, ĞèÒªÌí¼ÓĞÂµã
+    if (points[0].size() <= 10) { 
         goodFeaturesToTrack(gray, features, maxCount, qLevel, minDist);
         points[0].insert(points[0].end(), features.begin(), features.end());
         initial.insert(initial.end(), features.begin(), features.end());
     }
 
-    if (gray_prev.empty()) {    // µÚÒ»Ö¡perv»¹Îª¿Õ
+    if (gray_prev.empty()) {    // ï¿½ï¿½Ò»Ö¡pervï¿½ï¿½Îªï¿½ï¿½
         gray.copyTo(gray_prev);
     }
 
@@ -126,12 +127,14 @@ void tracking(Mat &frame, Mat &output) {
     
     sum_delta_col /= points[1].size();
     sum_delta_row /= points[1].size();
-    if (fabs(sum_delta_col)>10 || fabs(sum_delta_row)>10) {
-        current_position.x = current_position.x + sum_delta_col*0.1;
-        current_position.y = current_position.y + sum_delta_row*0.1;
-        cout<<current_position<<endl<<endl;
-        current_position.y = 
-        // 
+    if (fabs(sum_delta_col)>10 || fabs(sum_delta_row)>10) { // å¹³å‡deltaè¶…è¿‡é˜ˆå€¼
+        current_position.y += sum_delta_row*forward_direction.y + sum_delta_col*forward_direction.x; // row æ–¹å‘ä¸Šçš„delta 
+        current_position.x += sum_delta_row*(-1.0*forward_direction.x) + sum_delta_col*forward_direction.y;// col æ–¹å‘ä¸Šçš„
+
+        // current_position.x = current_position.x + sum_delta_col*0.1;
+        // current_position.y = current_position.y + sum_delta_row*0.1;
+        // cout<<current_position<<endl<<endl;
+        // current_position.y = 
     }
     map_.copyTo(t_mat);
     // cv::rectangle(t_mat,current_position,Scalar(0),2);

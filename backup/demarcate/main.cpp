@@ -28,7 +28,7 @@ cv::Mat imageSource;
 cv::Mat image;
 cv::Mat transf_element; // the ans mat;
 
-int camera_count = 1;
+int camera_count = 0;
 cv::VideoCapture cp(camera_count);
 
 int main(int argc,char*argv[])    
@@ -245,8 +245,8 @@ static void on_mouse(int event, int x, int y, int flags, void *) {
             cv::line(image,forward_points[0],forward_points[1],cv::Scalar(255,0,0),2);
             // write data
             ofstream out_file("../../src/ini/666.txt");
-            out_file<<(forward_points[1].x-forward_points[0].x)/get_distance(forward_points[0],forward_points[1])
-                <<endl<<(forward_points[1].y-forward_points[0].y)/get_distance(forward_points[0],forward_points[1]);
+            out_file<<(forward_points[0].x-forward_points[1].x)/get_distance(forward_points[0],forward_points[1])
+                <<endl<<(forward_points[0].y-forward_points[1].y)/get_distance(forward_points[0],forward_points[1]);
 
             out_file.close();
             break;
