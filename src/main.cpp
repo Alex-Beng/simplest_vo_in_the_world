@@ -2,9 +2,11 @@
 
 int main()
 {
-    minIni* test;
     cv::VideoCapture camera(0);
     cv::Mat frame;
+    ImgProc proc_header;
+    ImgProcResult proc_result;
+
     cv::namedWindow("raw_input");
     while (1){
         camera>>frame;
@@ -12,7 +14,10 @@ int main()
             break;
         }
         cv::imshow("raw_input",frame);
-        cv::waitKey(1);
+        char t_char = cv::waitKey(1);
+        if (t_char == 'q') {
+            break;
+        }
     }
     return 0;
 }

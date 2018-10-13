@@ -97,7 +97,7 @@ void tracking(Mat &frame, Mat &output) {
         initial.insert(initial.end(), features.begin(), features.end());
     }
 
-    if (gray_prev.empty()) {    // ��һ֡perv��Ϊ��
+    if (gray_prev.empty()) {   
         gray.copyTo(gray_prev);
     }
 
